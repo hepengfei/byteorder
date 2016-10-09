@@ -1,12 +1,9 @@
-// -*-mode:c++; coding:utf-8-*-
-
-#ifndef _KB_BYTEORDER_HPP_
-#define _KB_BYTEORDER_HPP_
+#pragma once
 
 //
-// about endianess, please see
-// http://www.cs.umass.edu/~verts/cs32/endian.html
-// 
+// about endianess, see http://www.cs.umass.edu/~verts/cs32/endian.html
+//
+
 
 #include <endian.h>
 #include <byteswap.h>
@@ -232,4 +229,3 @@ namespace kb
 
 } // namespace kb
 
-#endif	// _KB_BYTEORDER_HPP_
