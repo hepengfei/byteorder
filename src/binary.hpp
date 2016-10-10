@@ -2,131 +2,151 @@
 
 #include <stdint.h>
 
-#include "byteorder.hpp"
-
 namespace kb {
-
-  template<typename Endian>
-  struct Binary {
-    uint16_t Uint16(const char *data);
-    uint32_t Uint32(const char *data);
-    uint64_t Uint64(const char *data);
-
-    void PutUint16(char *data, uint16_t value);
-    void PutUint32(char *data, uint32_t value);
-    void PutUint64(char *data, uint64_t value);
-  };
-
-  template<>
-  struct Binary<big_endian> {
-    uint16_t Uint16(const char *data);
-    uint32_t Uint32(const char *data);
-    uint64_t Uint64(const char *data);
-
-    void PutUint16(char *data, uint16_t value);
-    void PutUint32(char *data, uint32_t value);
-    void PutUint64(char *data, uint64_t value);
-  };
-
-  template<>
-  struct Binary<little_endian> {
-    uint16_t Uint16(const char *data);
-    uint32_t Uint32(const char *data);
-    uint64_t Uint64(const char *data);
-
-    void PutUint16(char *data, uint16_t value);
-    void PutUint32(char *data, uint32_t value);
-    void PutUint64(char *data, uint64_t value);
-  };
+  namespace binary {
+    struct LittleEndian;
+    struct BigEndian;
+    typedef BigEndian Network;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    typedef LittleEndian Host;
+#else
+    typedef BigEndian Host;
+#endif
 
 
-  uint16_t Binary<little_endian>::Uint16(const char *data) {
-    return uint16_t(data[0]) | uint16_t(data[1]) << 8;
+    struct LittleEndian {
+      static const bool IsLittleEndian = true;
+
+      static uint16_t Uint16(const void *data);
+      static uint32_t Uint32(const void *data);
+      static uint64_t Uint64(const void *data);
+
+      static void PutUint16(void *data, uint16_t value);
+      static void PutUint32(void *data, uint32_t value);
+      static void PutUint64(void *data, uint64_t value);
+    };
+
+    struct BigEndian {
+      static const bool IsLittleEndian = false;
+
+      static uint16_t Uint16(const void *data);
+      static uint32_t Uint32(const void *data);
+      static uint64_t Uint64(const void *data);
+
+      static void PutUint16(void *data, uint16_t value);
+      static void PutUint32(void *data, uint32_t value);
+      static void PutUint64(void *data, uint64_t value);
+    };
+
+    inline
+    uint16_t LittleEndian::Uint16(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint16_t(d[0]) | uint16_t(d[1]) << 8;
+    }
+
+    inline
+    uint32_t LittleEndian::Uint32(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint32_t(d[0]) | uint32_t(d[1]) << 8 |
+        uint32_t(d[2]) << 16 | uint32_t(d[3]) << 24;
+    }
+
+    inline
+    uint64_t LittleEndian::Uint64(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint64_t(d[0]) | uint64_t(d[1]) << 8 |
+        uint64_t(d[2]) << 16 | uint64_t(d[3]) << 24 |
+        uint64_t(d[4]) << 32 | uint64_t(d[5]) << 40 |
+        uint64_t(d[6]) << 48 | uint64_t(d[7]) << 56;
+    }
+
+    inline
+    void LittleEndian::PutUint16(void *data, uint16_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value;
+      d[1] = value >> 8;
+    }
+
+    inline
+    void LittleEndian::PutUint32(void *data, uint32_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value;
+      d[1] = value >> 8;
+      d[2] = value >> 16;
+      d[3] = value >> 24;
+    }
+
+    inline
+    void LittleEndian::PutUint64(void *data, uint64_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value;
+      d[1] = value >> 8;
+      d[2] = value >> 16;
+      d[3] = value >> 24;
+      d[4] = value >> 32;
+      d[5] = value >> 40;
+      d[6] = value >> 48;
+      d[7] = value >> 56;
+    }
+
+    inline
+    uint16_t BigEndian::Uint16(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint16_t(d[1]) | uint16_t(d[0]) << 8;
+    }
+
+    inline
+    uint32_t BigEndian::Uint32(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint32_t(d[3]) | uint32_t(d[2]) << 8 |
+        uint32_t(d[1]) << 16 | uint32_t(d[0]) << 24;
+    }
+
+    inline
+    uint64_t BigEndian::Uint64(const void *data) {
+      const uint8_t *d = (const uint8_t *)data;
+      return uint64_t(d[7]) | uint64_t(d[6]) << 8 |
+        uint64_t(d[5]) << 16 | uint64_t(d[4]) << 24 |
+        uint64_t(d[3]) << 32 | uint64_t(d[2]) << 40 |
+        uint64_t(d[1]) << 48 | uint64_t(d[0]) << 56;
+    }
+
+    inline
+    void BigEndian::PutUint16(void *data, uint16_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value >> 8;
+      d[1] = value;
+    }
+
+    inline
+    void BigEndian::PutUint32(void *data, uint32_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value >> 24;
+      d[1] = value >> 16;
+      d[2] = value >> 8;
+      d[3] = value;
+    }
+
+    inline
+    void BigEndian::PutUint64(void *data, uint64_t value) {
+      uint8_t *d = (uint8_t *)data;
+      d[0] = value >> 56;
+      d[1] = value >> 48;
+      d[2] = value >> 40;
+      d[3] = value >> 32;
+      d[4] = value >> 24;
+      d[5] = value >> 16;
+      d[6] = value >> 8;
+      d[7] = value;
+    }
+
+    struct Encoder {
+      
+    };
+    struct Decoder {
+      
+    };
   }
 
-
-  uint32_t Binary<little_endian>::Uint32(const char *data) {
-    return uint32_t(data[0]) | uint32_t(data[1]) << 8 |
-      uint32_t(data[2]) << 16 | uint32_t(data[3]) << 24;
-  }
-
-
-  uint64_t Binary<little_endian>::Uint64(const char *data) {
-    return uint64_t(data[0]) | uint64_t(data[1]) << 8 |
-      uint64_t(data[2]) << 16 | uint64_t(data[3]) << 24 |
-      uint64_t(data[4]) << 32 | uint64_t(data[5]) << 40 |
-      uint64_t(data[6]) << 48 | uint64_t(data[7]) << 56;
-  }
-
-
-  void Binary<little_endian>::PutUint16(char *data, uint16_t value) {
-    data[0] = value;
-    data[1] = value >> 8;
-  }
-
-
-  void Binary<little_endian>::PutUint32(char *data, uint32_t value) {
-    data[0] = value;
-    data[1] = value >> 8;
-    data[2] = value >> 16;
-    data[3] = value >> 24;
-  }
-
-
-  void Binary<little_endian>::PutUint64(char *data, uint64_t value) {
-    data[0] = value;
-    data[1] = value >> 8;
-    data[2] = value >> 16;
-    data[3] = value >> 24;
-    data[4] = value >> 32;
-    data[5] = value >> 40;
-    data[6] = value >> 48;
-    data[7] = value >> 56;
-  }
-
-
-  uint16_t Binary<big_endian>::Uint16(const char *data) {
-    return uint16_t(data[1]) | uint16_t(data[0]) << 8;
-  }
-
-
-  uint32_t Binary<big_endian>::Uint32(const char *data) {
-    return uint32_t(data[3]) | uint32_t(data[2]) << 8 |
-      uint32_t(data[1]) << 16 | uint32_t(data[0]) << 24;
-  }
-
-
-  uint64_t Binary<big_endian>::Uint64(const char *data) {
-    return uint64_t(data[7]) | uint64_t(data[6]) << 8 |
-      uint64_t(data[5]) << 16 | uint64_t(data[4]) << 24 |
-      uint64_t(data[3]) << 32 | uint64_t(data[2]) << 40 |
-      uint64_t(data[1]) << 48 | uint64_t(data[0]) << 56;
-  }
-
-
-  void Binary<big_endian>::PutUint16(char *data, uint16_t value) {
-    data[0] = value >> 8;
-    data[1] = value;
-  }
-
-
-  void Binary<big_endian>::PutUint32(char *data, uint32_t value) {
-    data[0] = value >> 24;
-    data[1] = value >> 16;
-    data[2] = value >> 8;
-    data[3] = value;
-  }
-
-
-  void Binary<big_endian>::PutUint64(char *data, uint64_t value) {
-    data[0] = value >> 56;
-    data[1] = value >> 48;
-    data[2] = value >> 40;
-    data[3] = value >> 32;
-    data[4] = value >> 24;
-    data[5] = value >> 16;
-    data[6] = value >> 8;
-    data[7] = value;
-  }
 
 }
