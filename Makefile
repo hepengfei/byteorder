@@ -7,10 +7,10 @@ TEST_DIR = tests
 SAMPLE_DIR = samples
 
 # ========= files =========
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+SRCS = $(wildcard $(SRC_DIR)/*/*.cpp)
 OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-TEST_SRCS = $(wildcard $(TEST_DIR)/*.cpp)
+TEST_SRCS = $(wildcard $(TEST_DIR)/*.cpp $(TEST_DIR)/*/*.cpp)
 TEST_OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(TEST_SRCS))
 
 SAMPLE_SRCS = $(wildcard $(SAMPLE_DIR)/*.cpp)
